@@ -42,23 +42,6 @@ class Constant implements Term {
 
   contains(v: Variable): boolean { return false; }
 
-  log(base: Term, antilogarithm: Term): ScalarAndDimension | CalculateErrors | null {
-    const baseValue = base.getValue();
-    if (baseValue == null || isCalculateError(baseValue)) {
-      return baseValue;
-    }
-    const logValue = Math.log(this.value.n) / Math.log(baseValue.n);
-    return new ScalarAndDimension(logValue, this.value.d);
-  }
-
-  antilog(base: Term, logarithm: Term): ScalarAndDimension | CalculateErrors | null {
-    const baseValue = base.getValue();
-    if (baseValue == null || isCalculateError(baseValue)) {
-      return baseValue;
-    }
-    const antilogValue = Math.pow(baseValue.n, this.value.n);
-    return new ScalarAndDimension(antilogValue, this.value.d);
-  }
 }
 
 export class Variable implements Term {
@@ -192,32 +175,26 @@ class Exponentiate implements Term {
   }
 }
 
-class Logarithmize implements Term {
-  kind = TypeDiscriminator.Logarithmize;
+class Antilog implements Term {
+  kind = TypeDiscriminator.Antilog;
 
   private base: Term;
-  private antilogarithm: Term;
+  private logarithm: Term;
 
-  constructor(b: Term, a: Term) { [this.base, this.antilogarithm] = [b, a]; }
+  constructor(b: Term, l: Term) { [this.base, this.logarithm] = [b, l]; }
 
   contains(v: Variable): boolean {
-    return this.base.contains(v) || this.antilogarithm.contains(v);
+    return this.base.contains(v) || this.logarithm.contains(v);
   }
 
   getValue(): ScalarAndDimension | null {
-    return null;
-  /* TODO
     let base = this.base.getValue();
-    let antilogarithm = this.antilogarithm.getValue();
-    if (base == null || antilogarithm == null)
+    let logarithm = this.logarithm.getValue();
+    if (base == null || logarithm == null)
       return null;
-    return Math.log(base, antilogarithm);
-  */
+    return Math.pow(base, logarithm);
   }
 }
-
-type SolveErrors = 'overdefined' | 'underdefined' | 'too complex';
-function isSolveError(x: ScalarAndDimension | Term | null | SolveErrors): x is SolveErrors {
   return x === 'overdefined' || x === 'underdefined' || x === 'too complex';
 }
 
@@ -272,11 +249,11 @@ export class Equation {
       }
       return 'too complex';
     }
-    case TypeDiscriminator.Logarithmize: {
-      const logarithmize = <Logarithmize>this.LHS;
-      if (!logarithmize.getAntilogarithm().contains(v)) {
-        const left = logarithmize.getBase();
-        const right = Equation.log(this.RHS, Equation.log(logarithmize.getAntilogarithm(), Equation.constantFromNumber(-1)));
+    case TypeDiscriminator.Log: {
+      const log = <Log>this.LHS;
+      if (!log.getAntilogarithm().contains(v)) {
+        const left = log.getBase();
+        const right = Equation.log(this.RHS, Equation.log(log.getAntilogarithm(), Equation.constantFromNumber(-1)));
         return new Equation(left, right).solve(v);
       }
       return 'too complex';
@@ -499,7 +476,14 @@ export class Equation {
 
     return new Exponentiate(base, exponent);
   }
-  // TODO: log.
+
+  static log(base: Term, antilogarithm: Term): Term {
+    return new Log(base, antilogarithm);
+  }
+
+  static antilog(base: Term, logarithm: Term): Term {
+    return new Antilog(base, logarithm);
+  }
 
 }
 
