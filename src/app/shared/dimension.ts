@@ -170,13 +170,13 @@ export class ScalarAndDimensionMutable extends ScalarAndDimension {
     this.d = this.d.antilog(logarithm.n);
   }
 
-  logEq(antilogarithm: ScalarAndDimension): void | CalculateErrors {
+  logEq(logarithm: ScalarAndDimension): void | CalculateErrors {
     // 'this' is the base of the logarithm.
-    if (!antilogarithm.d.unit()) {
+    if (!logarithm.d.unit()) {
       return 'dimension conformity error';
     }
-    this.n = Math.log(this.n) / Math.log(antilogarithm.n);
-    this.d = this.d.log(antilogarithm.n);
+    this.n = Math.log(this.n) / Math.log(logarithm.n);
+    this.d = this.d.log(logarithm.n);
   }
     this.n = Math.log(this.n) / Math.log(antilogarithm.n);
     this.d = this.d.log(antilogarithm.n);
