@@ -169,7 +169,6 @@ export class ScalarAndDimensionMutable extends ScalarAndDimension {
     this.n = Math.pow(this.n, logarithm.n);
     this.d = this.d.antilog(logarithm.n);
   }
-    }
     this.n = Math.log(this.n) / Math.log(antilogarithm.n);
     this.d = this.d.log(antilogarithm.n);
   }
