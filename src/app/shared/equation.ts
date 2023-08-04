@@ -43,13 +43,21 @@ class Constant implements Term {
   contains(v: Variable): boolean { return false; }
 
   log(base: Term, antilogarithm: Term): ScalarAndDimension | CalculateErrors | null {
-    // TODO: Implement log method
-    return null;
+    const baseValue = base.getValue();
+    if (baseValue == null || isCalculateError(baseValue)) {
+      return baseValue;
+    }
+    const logValue = Math.log(this.value.n) / Math.log(baseValue.n);
+    return new ScalarAndDimension(logValue, this.value.d);
   }
 
   antilog(base: Term, logarithm: Term): ScalarAndDimension | CalculateErrors | null {
-    // TODO: Implement antilog method
-    return null;
+    const baseValue = base.getValue();
+    if (baseValue == null || isCalculateError(baseValue)) {
+      return baseValue;
+    }
+    const antilogValue = Math.pow(baseValue.n, this.value.n);
+    return new ScalarAndDimension(antilogValue, this.value.d);
   }
 }
 
@@ -222,7 +230,32 @@ export class Equation {
 
   // Rewrite equation into 'v = term' form.
   solve(v: Variable): Equation | SolveErrors {
-    // TODO: Update solve method to handle log and antilog operations
+    if (this.RHS.contains(v)) {
+      if (this.LHS.contains(v)) {
+        return 'too complex';
+      }
+      return new Equation(this.RHS, this.LHS).solve(v);
+    }
+    switch (this.LHS.kind) {
+    case TypeDiscriminator.Logarithmize: {
+      const logarithmize = <Logarithmize>this.LHS;
+      if (!logarithmize.getAntilogarithm().contains(v)) {
+        const left = logarithmize.getBase();
+        const right = Equation.log(this.RHS, Equation.log(logarithmize.getAntilogarithm(), Equation.constantFromNumber(-1)));
+        return new Equation(left, right).solve(v);
+      }
+      return 'too complex';
+    }
+    case TypeDiscriminator.Antilogarithmize: {
+      const antilogarithmize = <Antilogarithmize>this.LHS;
+      if (!antilogarithmize.getLogarithm().contains(v)) {
+        const left = antilogarithmize.getBase();
+        const right = Equation.antilog(this.RHS, Equation.antilog(antilogarithmize.getLogarithm(), Equation.constantFromNumber(-1)));
+        return new Equation(left, right).solve(v);
+      }
+      return 'too complex';
+    }
+    // ... rest of the switch statement ...
   }
 }
       }
