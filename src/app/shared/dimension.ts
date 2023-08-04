@@ -63,6 +63,20 @@ export class Dimension {
                          this.time * other);
   }
 
+  log(other: number): Dimension {
+    return new Dimension(this.mass / other,
+                         this.length / other,
+                         this.molar_mass / other,
+                         this.time / other);
+  }
+
+  antilog(other: number): Dimension {
+    return new Dimension(this.mass * other,
+                         this.length * other,
+                         this.molar_mass * other,
+                         this.time * other);
+  }
+
   recip(): Dimension {
     return new Dimension(-this.mass,
                          -this.length,
@@ -147,10 +161,24 @@ export class ScalarAndDimensionMutable extends ScalarAndDimension {
     this.n **= exponent.n;
     this.d = this.d.exp(exponent.n);
   }
-
-  /* TODO
-  logEq(antilogarithm: ScalarAndDimension): void | CalculateErrors {
-    // 'this' is the base of the logarithm.
+  antilogEq(logarithm: ScalarAndDimension): void | CalculateErrors {
+    // 'this' is the base of the antilogarithm.
+    if (!logarithm.d.unit()) {
+      return 'dimension conformity error';
+    }
+    this.n = Math.pow(this.n, logarithm.n);
+    this.d = this.d.antilog(logarithm.n);
   }
-  */
+
+  logEq(logarithm: ScalarAndDimension): void | CalculateErrors {
+    // 'this' is the base of the logarithm.
+    if (!logarithm.d.unit()) {
+      return 'dimension conformity error';
+    }
+    this.n = Math.log(this.n) / Math.log(logarithm.n);
+    this.d = this.d.log(logarithm.n);
+  }
+    this.n = Math.log(this.n) / Math.log(antilogarithm.n);
+    this.d = this.d.log(antilogarithm.n);
+  }
 }
