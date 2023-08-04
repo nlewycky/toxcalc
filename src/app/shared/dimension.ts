@@ -63,6 +63,20 @@ export class Dimension {
                          this.time * other);
   }
 
+  log(other: number): Dimension {
+    return new Dimension(this.mass / other,
+                         this.length / other,
+                         this.molar_mass / other,
+                         this.time / other);
+  }
+
+  antilog(other: number): Dimension {
+    return new Dimension(this.mass * other,
+                         this.length * other,
+                         this.molar_mass * other,
+                         this.time * other);
+  }
+
   recip(): Dimension {
     return new Dimension(-this.mass,
                          -this.length,
