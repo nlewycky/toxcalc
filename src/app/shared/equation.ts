@@ -237,61 +237,6 @@ export class Equation {
       return new Equation(this.RHS, this.LHS).solve(v);
     }
     switch (this.LHS.kind) {
-    case TypeDiscriminator.Logarithmize: {
-      const logarithmize = <Logarithmize>this.LHS;
-      if (!logarithmize.getAntilogarithm().contains(v)) {
-        const left = logarithmize.getBase();
-        const right = Equation.log(this.RHS, Equation.log(logarithmize.getAntilogarithm(), Equation.constantFromNumber(-1)));
-        return new Equation(left, right).solve(v);
-      }
-      return 'too complex';
-    }
-    case TypeDiscriminator.Antilogarithmize: {
-      const antilogarithmize = <Antilogarithmize>this.LHS;
-      if (!antilogarithmize.getLogarithm().contains(v)) {
-        const left = antilogarithmize.getBase();
-        const right = Equation.antilog(this.RHS, Equation.antilog(antilogarithmize.getLogarithm(), Equation.constantFromNumber(-1)));
-        return new Equation(left, right).solve(v);
-      }
-      return 'too complex';
-    }
-    case TypeDiscriminator.Constant: {
-      return 'too complex';
-    }
-    case TypeDiscriminator.Variable: {
-      if (this.LHS === v) {
-        return this;
-      }
-      return 'too complex';
-    }
-    case TypeDiscriminator.Add: {
-      const add = <Add>this.LHS;
-      const left = add.collect(function(t: Term) { return t.contains(v); });
-    }
-    case TypeDiscriminator.Multiply: {
-      const multiply = <Multiply>this.LHS;
-      const left = multiply.collect(function(t: Term) { return t.contains(v); });
-      if (left['collected'].length !== 1) {
-        return 'too complex';
-      }
-      const right = Equation.div(this.RHS, Equation.mulFromArray(left['anticollected']));
-      return new Equation(left['collected'][0], right).solve(v);
-    }
-    case TypeDiscriminator.Exponentiate: {
-      const exponentiate = <Exponentiate>this.LHS;
-      if (!exponentiate.getExponent().contains(v)) {
-        const left = exponentiate.getBase();
-        const right = Equation.exp(this.RHS, Equation.exp(exponentiate.getExponent(), Equation.constantFromNumber(-1)));
-        return new Equation(left, right).solve(v);
-      }
-      return 'too complex';
-    }
-  }
-}
-      }
-      return new Equation(this.RHS, this.LHS).solve(v);
-    }
-    switch (this.LHS.kind) {
     case TypeDiscriminator.Add: {
       const add = <Add>this.LHS;
       const left = add.collect(function(t: Term) { return t.contains(v); });
@@ -327,8 +272,24 @@ export class Equation {
       }
       return 'too complex';
     }
-    case TypeDiscriminator.Logarithmize:
+    case TypeDiscriminator.Logarithmize: {
+      const logarithmize = <Logarithmize>this.LHS;
+      if (!logarithmize.getAntilogarithm().contains(v)) {
+        const left = logarithmize.getBase();
+        const right = Equation.log(this.RHS, Equation.log(logarithmize.getAntilogarithm(), Equation.constantFromNumber(-1)));
+        return new Equation(left, right).solve(v);
+      }
       return 'too complex';
+    }
+    case TypeDiscriminator.Antilogarithmize: {
+      const antilogarithmize = <Antilogarithmize>this.LHS;
+      if (!antilogarithmize.getLogarithm().contains(v)) {
+        const left = antilogarithmize.getBase();
+        const right = Equation.antilog(this.RHS, Equation.antilog(antilogarithmize.getLogarithm(), Equation.constantFromNumber(-1)));
+        return new Equation(left, right).solve(v);
+      }
+      return 'too complex';
+    }
     default:
       const exhaustive: never = this.LHS.kind;
       return exhaustive;
