@@ -255,7 +255,37 @@ export class Equation {
       }
       return 'too complex';
     }
-    // ... rest of the switch statement ...
+    case TypeDiscriminator.Constant: {
+      return 'too complex';
+    }
+    case TypeDiscriminator.Variable: {
+      if (this.LHS === v) {
+        return this;
+      }
+      return 'too complex';
+    }
+    case TypeDiscriminator.Add: {
+      const add = <Add>this.LHS;
+      const left = add.collect(function(t: Term) { return t.contains(v); });
+    }
+    case TypeDiscriminator.Multiply: {
+      const multiply = <Multiply>this.LHS;
+      const left = multiply.collect(function(t: Term) { return t.contains(v); });
+      if (left['collected'].length !== 1) {
+        return 'too complex';
+      }
+      const right = Equation.div(this.RHS, Equation.mulFromArray(left['anticollected']));
+      return new Equation(left['collected'][0], right).solve(v);
+    }
+    case TypeDiscriminator.Exponentiate: {
+      const exponentiate = <Exponentiate>this.LHS;
+      if (!exponentiate.getExponent().contains(v)) {
+        const left = exponentiate.getBase();
+        const right = Equation.exp(this.RHS, Equation.exp(exponentiate.getExponent(), Equation.constantFromNumber(-1)));
+        return new Equation(left, right).solve(v);
+      }
+      return 'too complex';
+    }
   }
 }
       }
