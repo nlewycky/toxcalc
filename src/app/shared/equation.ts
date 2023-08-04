@@ -20,7 +20,6 @@ enum TypeDiscriminator {
   Exponentiate,
   Logarithmize,
 }
-
 export interface Term {
   kind: TypeDiscriminator;
 
@@ -258,15 +257,7 @@ export class Equation {
       }
       return 'too complex';
     }
-    case TypeDiscriminator.Antilogarithmize: {
-      const antilogarithmize = <Antilogarithmize>this.LHS;
-      if (!antilogarithmize.getLogarithm().contains(v)) {
-        const left = antilogarithmize.getBase();
-        const right = Equation.antilog(this.RHS, Equation.antilog(antilogarithmize.getLogarithm(), Equation.constantFromNumber(-1)));
-        return new Equation(left, right).solve(v);
-      }
-      return 'too complex';
-    }
+    // Removed Antilogarithmize case
     default:
       const exhaustive: never = this.LHS.kind;
       return exhaustive;
@@ -481,8 +472,8 @@ export class Equation {
     return new Log(base, antilogarithm);
   }
 
-  static antilog(base: Term, logarithm: Term): Term {
-    return new Antilog(base, logarithm);
+  static nthRoot(x: Term, n: Term): Term {
+    return Equation.exp(x, Equation.exp(Equation.mul(n, Equation.constantFromNumber(-1))));
   }
 
 }
