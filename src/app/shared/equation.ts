@@ -27,6 +27,10 @@ export interface Term {
   contains(v: Variable): boolean;
 
   getValue(): ScalarAndDimension | CalculateErrors | null;
+
+  log(base: Term, antilogarithm: Term): ScalarAndDimension | CalculateErrors | null;
+
+  antilog(base: Term, logarithm: Term): ScalarAndDimension | CalculateErrors | null;
 }
 
 class Constant implements Term {
@@ -37,6 +41,16 @@ class Constant implements Term {
   getValue(): ScalarAndDimension { return this.value; }
 
   contains(v: Variable): boolean { return false; }
+
+  log(base: Term, antilogarithm: Term): ScalarAndDimension | CalculateErrors | null {
+    // TODO: Implement log method
+    return null;
+  }
+
+  antilog(base: Term, logarithm: Term): ScalarAndDimension | CalculateErrors | null {
+    // TODO: Implement antilog method
+    return null;
+  }
 }
 
 export class Variable implements Term {
@@ -208,9 +222,9 @@ export class Equation {
 
   // Rewrite equation into 'v = term' form.
   solve(v: Variable): Equation | SolveErrors {
-    if (this.RHS.contains(v)) {
-      if (this.LHS.contains(v)) {
-        return 'too complex';
+    // TODO: Update solve method to handle log and antilog operations
+  }
+}
       }
       return new Equation(this.RHS, this.LHS).solve(v);
     }
